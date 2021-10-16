@@ -96,9 +96,10 @@ async function bookYMCALane () {
 
         if(success){
           break;
-        }
-        
+        } 
     }
+
+    browser.close()
 }   
 //bookYMCALane();
 
