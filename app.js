@@ -17,7 +17,7 @@ const endpoint = `https://ymcametroatlanta.skedda.com/booking?spaceviewid=40275&
 /*INPUTS*/
 const email = process.env.EMAIL
 const password = process.env.PASSWORD
-const startTimeRegex = /8:00 AM/gi
+const startTimeRegex = /2:00 PM/gi
 const idealLanesRegex = /Buckhead Y - Lap Lane 1|Buckhead Y - Lap Lane 2|Buckhead Y - Lap Lane 5/gi
 /****************************************/
 
@@ -104,7 +104,7 @@ async function bookYMCALane () {
 
     browser.close()
 }   
-bookYMCALane();
+//bookYMCALane();
 
 module.exports = {
   bookYMCALane
