@@ -17,13 +17,13 @@ const endpoint = `https://ymcametroatlanta.skedda.com/booking?spaceviewid=40275&
 /*INPUTS*/
 const email = process.env.EMAIL
 const password = process.env.PASSWORD
-const startTimeRegex = /1:00 PM/gi
+const startTimeRegex = /8:00 AM/gi
 const idealLanesRegex = /Buckhead Y - Lap Lane 1|Buckhead Y - Lap Lane 2|Buckhead Y - Lap Lane 5/gi
 /****************************************/
 
 async function bookYMCALane () {
 
-    const browser = await puppeteer.launch({headless:false});
+    const browser = await puppeteer.launch({headless:true});
     const page = await browser.newPage();
     await page.goto(endpoint);
 
@@ -70,10 +70,13 @@ async function bookYMCALane () {
     await lapLaneDropdown.click()
     const lapLaneMenu = await page.waitForSelector('div.dropdown.show');
     const inScopeLapLaneEls = await lapLaneMenu.$$('.dropdown-item');
-    const inScopeLanes = inScopeLapLaneEls.map(el => el.evaluate(e => e.textContent))
-    const laneElementIndexes = await Promise.allSettled(inScopeLanes).then(res => {
+    //const inScopeLanes = inScopeLapLaneEls.map(el => el.evaluate(e => e.textContent))
+    const laneElementIndexes = [7,8,13];
+    /*
+    await Promise.allSettled(inScopeLanes).then(res => {
       return res.map((lane,i) => idealLanesRegex.test(lane.value) ? i:null ).filter(a => a) //filter out null values
     })
+    */
     
     //try each lane in order to see if we can book it. Exit if we are succesful.  
     for(let i=0; i<laneElementIndexes.length;i++){
@@ -101,7 +104,7 @@ async function bookYMCALane () {
 
     browser.close()
 }   
-//bookYMCALane();
+bookYMCALane();
 
 module.exports = {
   bookYMCALane

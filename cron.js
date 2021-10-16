@@ -13,7 +13,7 @@ const {bookYMCALane} = require('./app')
  # * * * * * *
 */
 console.log('Cron scheduler running')
-cron.schedule('0 13 * * *', () => {
+cron.schedule('0 8 * * *', () => {
   console.log('Trying to book Swim Lane');
   bookYMCALane();
 });
