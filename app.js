@@ -111,7 +111,7 @@ async function bookYMCALane () {
     log.info('*************** END RUN LOG ***************')
     browser.close()
 }   
-bookYMCALane();
+//bookYMCALane();
 
 module.exports = {
   bookYMCALane
