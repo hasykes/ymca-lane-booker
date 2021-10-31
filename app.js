@@ -8,6 +8,7 @@ Prefer lanes 1,2, or 5 (get your own lane)
 require('dotenv').config();
 const puppeteer = require('puppeteer');
 const moment = require('moment');
+const log = require('simple-node-logger').createSimpleLogger('run.log');
 
 const tomorrow = moment().add(1,'days').format('YYYY-MM-DD')
 const endpoint = `https://ymcametroatlanta.skedda.com/booking?spaceviewid=40275&viewdate=${tomorrow}&viewend=${tomorrow}`
@@ -24,7 +25,7 @@ const startTimeRegex = /8:00 AM/gi
 
 async function bookYMCALane () {
 
-    console.log('Running Lane Booker...')
+    log.info('Running Lane Booker...')
     const browser = await puppeteer.launch({headless:true});
     const page = await browser.newPage();
     await page.goto(endpoint);
@@ -34,7 +35,7 @@ async function bookYMCALane () {
 
     var modalBody = await page.waitForSelector('.modal-body');
     const emailInput = await page.$('input[type="email"]');
-    console.log('Logging In...')
+    log.info('Logging In...')
     if(emailInput){
         await emailInput.type(email)
         page.waitForTimeout(3000)
@@ -45,19 +46,19 @@ async function bookYMCALane () {
         await passwordInput.type(password)
         await page.$eval('#remember-me-checkbox',el => el.click()); //check remember me button
         await page.$eval('button[type="submit"]',el => el.click());
-        console.log('Logged In, waiting for confirmation...')
+        log.info('Logged In, waiting for confirmation...')
         //update with new addButtonElement reference
         addButtonElement = await page.waitForSelector("button[title='Make a new booking']")
         addButtonElement.click({delay:10})
     }
 
     //You're now logged in, time to book a lane
-    console.log('Looking for available Lanes...')
+    log.info('Looking for available Lanes...')
     var modalBody = await page.waitForSelector('.modal-body');
     const allDropdowns = await modalBody.$$('.dropdown') //only need 1 (start time),3 (lap lane)
     
     //Select your start time
-    console.log('Selecting start time...')
+    log.info('Selecting start time...')
     const startTimeDropdown = allDropdowns[1]
     await startTimeDropdown.click()
     const startTimeMenu = await page.waitForSelector('div.dropdown.show');
@@ -70,7 +71,7 @@ async function bookYMCALane () {
     await inScopeTimeEls[timeElementIndexes[0]].click()
     
     //Select your lane
-    console.log('Selecting Lane...')
+    log.info('Selecting Lane...')
     const lapLaneDropdown = allDropdowns[3];
     await lapLaneDropdown.click()
     const lapLaneMenu = await page.waitForSelector('div.dropdown.show');
@@ -85,7 +86,7 @@ async function bookYMCALane () {
     
     //try each lane in order to see if we can book it. Exit if we are succesful.  
     for(let i=0; i<laneElementIndexes.length;i++){
-        console.log(` > Trying Lane option ${i+1}...`)
+        log.info(` > Trying Lane option ${i+1}...`)
         if(i > 0){
           //unclick the previous selection
           await page.evaluate(e => e.click(),inScopeLapLaneEls[laneElementIndexes[i-1]])
@@ -95,10 +96,10 @@ async function bookYMCALane () {
         const success = await page.waitForSelector('.alert-danger',{timeout:3000})
         .then(errorOnRequest => {
           if (!errorOnRequest){
-            inScopeLanes[laneElementIndexes[i]].then(lane => console.log(' > > Succesfully Booked ' + lane.trim()))
+            inScopeLanes[laneElementIndexes[i]].then(lane => log.info(' > > Succesfully Booked ' + lane.trim()))
             return true
           }
-          inScopeLanes[laneElementIndexes[i]].then(lane => console.log(' > > Failed to Book ' + lane.trim()))
+          inScopeLanes[laneElementIndexes[i]].then(lane => log.info(' > > Failed to Book ' + lane.trim()))
           return false
         })
         .catch(err => null);
@@ -107,10 +108,10 @@ async function bookYMCALane () {
           break;
         } 
     }
-
+    log.info('*************** END RUN LOG ***************')
     browser.close()
 }   
-//bookYMCALane();
+bookYMCALane();
 
 module.exports = {
   bookYMCALane
